@@ -1,32 +1,42 @@
 import { ApolloServer } from "@apollo/server";
 import { startStandaloneServer } from "@apollo/server/standalone";
 
-//  Энэ хэсэг нь GraphQL схем буюу хэрэглэгч ямар төрлийн мэдээлэл асууж болохыг тодорхойлж байна.
+const players = [
+  { id: "JG8NG", name: "Нараа", rating: 4.4, hasTeam: false, age: 23 },
+  { id: "AJQEE", name: "Төрөө", rating: 3.8, hasTeam: true, age: 17 },
+  { id: "5WFU3", name: "Болдоо", rating: 4.7, hasTeam: true, age: 28 },
+];
+
 const typeDefs = `
-  type Query {
-    hello: String
-    ognoo: String
-  }
+   type Query {
+     me: Player
+     players: [Player!]!
+     player(id: ID!): Player
+ }
+ type Player {
+   id: ID!
+   name: String!
+   rating: Float
+   hasTeam: Boolean
+   age: Int!
+ }
 `;
 
-// Энэ бол resolvers буюу хэрэглэгч hello, ognoo query асуухад яг ямар өгөгдөл буцаахыг заадаг функцууд.
 const resolvers = {
   Query: {
-    hello: () => "Hello world",
-    ognoo: () => new Date().toLocaleString(),
+    me: () => players[2],
+    players: () => players,
+    player: (root, { id }, context) => {
+      return players.find((player) => player.id === id);
+    },
   },
 };
 
-// typeDefs, resolvers-оо Apollo Server-д өгч байна.
 const server = new ApolloServer({
   typeDefs,
   resolvers,
 });
 
-// Серверийг ажиллуулах
-const { url } = await startStandaloneServer(server, {
-  listen: { port: 4000 },
-});
+const { url } = await startStandaloneServer(server, { listen: { port: 4567 } });
 
-// Консолд хэвлэх
-console.log(`🚀 Server ready at ${url}`);
+console.log(`🚀 Аполло graphql сэрвэр: ${url}`);
